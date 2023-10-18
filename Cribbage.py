@@ -30,7 +30,7 @@ from Scoring import getScore,scoreCards
 
 # Utility imports
 from Utilities import cardsString,areCardsEqual
-import random
+import random 
 
 class Cribbage:
     def __init__(self, playerArray, critic = None, verboseFlag = True, rigged=False):
@@ -113,7 +113,7 @@ class Cribbage:
         while not (self.checkWin()):
             self.playHand()
 
-        # print("{} wins! The final score was ".format(self.players[self.checkWin() - 1].getName()) + self.scoreString())
+        print("{} wins! The final score was ".format(self.players[self.checkWin() - 1].getName()) + self.scoreString())
         return self.players[0].pips - self.players[1].pips
 
     # Deal the initial hands to each player
