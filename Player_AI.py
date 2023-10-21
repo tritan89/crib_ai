@@ -22,6 +22,7 @@
 ################################################################################
 
 # Cribbage imports
+from calendar import c
 from Player import Player
 from Utilities import *
 from Deck import Card,RiggedDeck
@@ -41,23 +42,27 @@ class Player_AI(Player):
     def __init__(self, number,verboseFlag):
         super().__init__(number)
         self.verbose = verboseFlag
-        self.name = "Random"
+        self.name = "AI"
 
     def reset(self, gameState=None):
         super().reset()
 
+    def __selectCribCards__(self, handSize):
+        return random.randrange(0,handSize,1)
+    
+    def __selectCard__(self, handSize):
+        return random.randrange(0,handSize,1)
+
     # Function to pass crib card to play hand
     def throwCribCards(self, numCards, gameState):
-
-        # Function to determine which cards to throw into the crib
-        def selectCribCards(self, gameState):
-            return random.randrange(len(self.hand))
+        print('gameState', gameState);
+        handSize = len(self.hand)
 
         cribCards = []
 
-        for i in range(0, numCards):
-            selectedCard = selectCribCards(self, gameState)
-            cribCards.append(self.hand.pop(selectedCard))
+        # Function to determine which cards to throw into the crib
+        selectedCard = self.__selectCribCards__(handSize)
+        cribCards.append(self.hand.pop(selectedCard))
         
         if self.verbose:
             print("{} threw {} cards into the crib".format(self.getName(), numCards))
@@ -68,28 +73,47 @@ class Player_AI(Player):
 
     # Randomly select a card to play while making sure that it won't put the count over 31
     def playCard(self, gameState):
-        cardIndices = list(range(0, len(self.playhand)))
-        playedCard = None
+        handSize = len(self.playhand)
+        cardIndices = list(range(0, handSize))
         count = gameState['count']
-        if len(self.playhand) != 0:
-            while playedCard is None:
-                index = random.randint(0, len(cardIndices) - 1)
-                cardIndex = cardIndices[index]
-                if count + self.playhand[cardIndex].value() < 32:
-                    playedCard = self.playhand.pop(cardIndex)
-                    if(self.verbose):
-                        print("\tPlayer_AI ({}) played {}".format(self.number, str(playedCard)))
-                else:
-                    cardIndices.pop(index)
-                    if len(cardIndices) == 0:
-                        if(self.verbose):
-                            print("\tPlayer_AI ({}) says go!".format(self.number))
-                        break
-        else:
+        playedCard = None
+
+        while playedCard is None:
+            
+            if(self.checkForEmptyHand()):
+                return None
+        
+            index = self.__selectCard__(handSize)
+            cardIndex = cardIndices[index]
+          
+            if(self.checkForNonPlayableCard(cardIndex, count)):
+                if(self.checkForNoPlayableCards(cardIndices,index)):
+                    return None
+                 
+            playedCard = self.playhand.pop(cardIndex)
             if(self.verbose):
-                print("\tPlayer_AI ({}) has no cards left; go!".format(self.number))
+                print("\tPlayer_AI ({}) played {}".format(self.number, str(playedCard)))
 
         return playedCard
+    
+    def checkForNonPlayableCard(self, cardIndex, count):
+        if count + self.playhand[cardIndex].value() > 31:
+            return True
+ 
+   # checks if the player has any cards left in their hand
+    def checkForEmptyHand(self):
+        if(len(self.playhand) == 0):
+            if(self.verbose):
+                print("\tPlayer_AI ({}) has no cards left; go!".format(self.number))
+            return True
+
+    # noPlayableCards is called when the player has no playable cards
+    def checkForNoPlayableCards(self,cardIndices, index):
+        cardIndices.pop(index)
+        if len(cardIndices) == 0:
+            if(self.verbose):
+                print("\tPlayer_AI ({}) has no playable cards; go!".format(self.number))
+            return True
 
     # Explain why certain cards were thrown into the crib
     def explainThrow(self,numCards,gameState):
