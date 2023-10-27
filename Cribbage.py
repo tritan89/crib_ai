@@ -131,6 +131,7 @@ class Cribbage:
     def createCrib(self):
         for player in self.players:
             thrown = player.throwCribCards(2, self.gameState())
+            
             if not(self.critic is None) and player.number == 1:
                 criticThrows = self.critic.throwCribCards(2,self.gameState())
                 if not(areCardsEqual(criticThrows,thrown)):

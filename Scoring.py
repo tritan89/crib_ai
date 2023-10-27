@@ -41,6 +41,15 @@ def getScore(hand, starter, verbose):
     pips += checkRuns(hand, verbose)
     return pips
 
+def getScoreNoStarter(hand, verbose):
+    pips = 0
+    pips += checkPairs(hand, verbose)
+    for numCards in range(2, len(hand) + 1):
+        for combination in combinations(hand, numCards):
+            pips += checkSum(combination, 15, verbose)
+    pips += checkRuns(hand, verbose)
+    return pips
+
 def checkPairs(hand, verbose):
     pips = 0
     for i in range(0, len(hand)):

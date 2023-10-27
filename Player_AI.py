@@ -25,8 +25,9 @@
 from calendar import c
 from Player import Player
 from Utilities import *
-from Deck import Card,RiggedDeck
+from Deck import Card,RiggedDeck, Deck
 from Arena import Arena
+from Scoring import getScoreNoStarter, getScore
 
 # Player imports
 from Myrmidon import Myrmidon
@@ -36,6 +37,7 @@ import numpy as np
 import random
 import matplotlib
 import matplotlib.pyplot as plt
+from itertools import combinations
 
 class Player_AI(Player):
 
@@ -47,8 +49,70 @@ class Player_AI(Player):
     def reset(self, gameState=None):
         super().reset()
 
+    # selects crib cards based on the highest scoring hand without the starter card
     def __selectCribCards__(self, handSize):
-        return random.randrange(0,handSize,1)
+        possible_hands = combinations(self.hand, 4)
+        max_score = -1
+        bestHand = []
+        for hand in possible_hands: 
+            hand = list(hand)
+            hand_score = getScoreNoStarter(hand, False)
+            if hand_score > max_score:
+                max_score = hand_score
+                bestHand = hand
+        crib_cards = [x for x in self.hand if x not in bestHand]
+        return bestHand, crib_cards
+    
+
+    
+   
+
+
+    # takes in a list of lists with the inner list containg a list with [hand, hand_score, card, crib_cards]
+    #outermost list of list where each list contains a different hand 
+    # inner contains a list of the hand with every possible starter card and the score of that hand with that starter card
+    def analyzeCribCards(self, scored_hands):
+        bestHand = []
+        avgResult = []
+        hand_list = []
+        for hand in scored_hands:
+            avg= 0
+            for hand_score in hand:
+                avg += hand_score[1]
+            avg =avg/15
+            avgResult.append(avg)
+            hand_list.append(hand_score[0],hand_score[3])
+        max_score = max(avgResult)
+        index = avgResult.index(max_score)
+        bestHand = hand_list[index]
+        return bestHand
+    
+    def get_deck_without_hand(self, hand):
+        deck = Deck()
+        for card in hand:
+            deck.cards.remove(card)
+        return deck
+
+    def __CribCardsWithstarter__(self):
+            possible_hands = combinations(self.hand, 4)
+            deck = self.get_deck_without_hand(self.hand)
+            bestHand = []
+            scores = []
+            for hand in possible_hands: 
+                hand = list(hand)
+                crib_cards = [x for x in self.hand if x not in hand]
+                scores_with_card=[]
+                for card in deck.cards: # check every card in the deck with the hand given
+                    hand_score = getScore(hand, card, False)
+                    
+                    scores_with_card.append([hand, hand_score, card, crib_cards]) #create a list of lists with the hand, score, starter card, and crib cards
+                scores.append(scores_with_card)
+            return analyzeCribCards(scores)
+    
+
+
+        
+    
     
     def __selectCard__(self, handSize):
         return random.randrange(0,handSize,1)
@@ -58,12 +122,8 @@ class Player_AI(Player):
         print('gameState', gameState);
         handSize = len(self.hand)
 
-        cribCards = []
-
         # Function to determine which cards to throw into the crib
-        selectedCard = self.__selectCribCards__(handSize)
-        cribCards.append(self.hand.pop(selectedCard))
-        
+        self.hand, cribCards = self.__selectCribCards__(handSize)
         if self.verbose:
             print("{} threw {} cards into the crib".format(self.getName(), numCards))
 
@@ -140,7 +200,7 @@ if __name__ == '__main__':
     windowSize = 100
         
     # Create and run arena
-    arena = Arena([player1, player2],repeatFlag)
+    arena = Arena([player1, player2],repeatFlag,False)
     results = arena.playHands(numHands)
     
     # Plot results from arena
@@ -168,7 +228,7 @@ if __name__ == '__main__':
     
     moveAvg, = ax0.plot(x,y0,label='Moving Average')
     fullAvg, = ax0.plot(x,mu0,label='Trial Average\n({0:2f} points)'.format(avgResult0))
-    ax0.set(ylabel='Pegging Differential', title="Random vs. Myrmidon (5 Simulations)\n(Moving Average Window Size = {0})".format(windowSize))
+    ax0.set(ylabel='Pegging Differential', title="AI vs. Myrmidon (5 Simulations)\n(Moving Average Window Size = {0})".format(windowSize))
     ax0.grid()
     ax0.legend(handles=[moveAvg,fullAvg],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     
@@ -179,12 +239,12 @@ if __name__ == '__main__':
     ax1.legend(handles=[moveAvg,fullAvg],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     
     moveAvg, = ax2.plot(x,y2,label='Moving Average')
-    fullAvg, = ax2.plot(x,mu2,label='Trial Average\n({0:2f} points)'.format(avgResult2))
+    fullAvg, = ax2.plot(x,mu2,label='AI Average\n({0:2f} points)'.format(avgResult2))
     ax2.set(xlabel='Hand Number', ylabel='Total Differential')
     ax2.grid()
     ax2.legend(handles=[moveAvg,fullAvg],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     
     plt.tight_layout()
 
-    fig.savefig("randomPlayerLearningCurveNonStationary.png")
+    fig.savefig("AIPlayerLearningCurveNonStationary.png")
     plt.show()
