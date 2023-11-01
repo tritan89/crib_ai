@@ -81,34 +81,33 @@ class Player_AI(Player):
                 avg += hand_score[1]
             avg =avg/15
             avgResult.append(avg)
-            hand_list.append(hand_score[0],hand_score[3])
+            hand_list.append([hand_score[0],hand_score[3]])
         max_score = max(avgResult)
         index = avgResult.index(max_score)
         bestHand = hand_list[index]
         return bestHand
     
     def get_deck_without_hand(self, hand):
-        deck = Deck()
+        deck = Deck(1)
         for card in hand:
             deck.cards.remove(card)
         return deck
 
     def __CribCardsWithstarter__(self):
-            possible_hands = combinations(self.hand, 4)
-            deck = self.get_deck_without_hand(self.hand)
-            bestHand = []
-            scores = []
-            for hand in possible_hands: 
-                hand = list(hand)
-                crib_cards = [x for x in self.hand if x not in hand]
-                scores_with_card=[]
-                for card in deck.cards: # check every card in the deck with the hand given
-                    hand_score = getScore(hand, card, False)
-                    
-                    scores_with_card.append([hand, hand_score, card, crib_cards]) #create a list of lists with the hand, score, starter card, and crib cards
-                scores.append(scores_with_card)
-            return analyzeCribCards(scores)
-    
+        possible_hands = combinations(self.hand, 4)
+        deck = self.get_deck_without_hand(self.hand)
+        scores = []
+        for hand in possible_hands: 
+            hand = list(hand)
+            crib_cards = [x for x in self.hand if x not in hand]
+            scores_with_card=[]
+            for card in deck.cards: # check every card in the deck with the hand given
+                hand_score = getScore(hand, card, False)
+                
+                scores_with_card.append([hand, hand_score, card, crib_cards]) #create a list of lists with the hand, score, starter card, and crib cards
+            scores.append(scores_with_card)
+        return self.analyzeCribCards(scores)
+
 
 
         
@@ -123,7 +122,7 @@ class Player_AI(Player):
         handSize = len(self.hand)
 
         # Function to determine which cards to throw into the crib
-        self.hand, cribCards = self.__selectCribCards__(handSize)
+        self.hand, cribCards = self.__CribCardsWithstarter__()
         if self.verbose:
             print("{} threw {} cards into the crib".format(self.getName(), numCards))
 

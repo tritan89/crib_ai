@@ -100,7 +100,7 @@ class Cribbage:
             self.show()
         self.play()
         
-        # self.scoreHands()
+        self.scoreHands()
         if self.verbose:
             print("Score is " + self.scoreString())
             print("*******************************")
@@ -112,7 +112,7 @@ class Cribbage:
     def playGame(self):
         while not (self.checkWin()):
             self.playHand()
-
+            
         print("{} wins! The final score was ".format(self.players[self.checkWin() - 1].getName()) + self.scoreString())
         return self.players[0].pips - self.players[1].pips
 
