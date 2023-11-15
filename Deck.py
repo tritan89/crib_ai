@@ -18,12 +18,16 @@
 
 from enum import Enum
 import random
+import pygame
+
+
 
 class Suit(Enum):
     Spades = 1
     Hearts = 2
     Diamonds = 3
     Clubs = 4
+
 
 class Rank(Enum):
     Ace = 1
@@ -40,7 +44,11 @@ class Rank(Enum):
     Queen = 12
     King = 13
 
+
 class Card:
+    """Class representing a card"""
+    image = None
+
     def __init__(self, rank, suit):
         if type(suit) == int:
             self.suit = Suit(suit)
@@ -51,6 +59,9 @@ class Card:
             self.rank = Rank(rank)
         else:
             self.rank = rank
+
+        self.image = pygame.image.load(
+            'img/' + str(rank) + str(self.suit.name[0]) + '.png')
 
     def __lt__(self, other):
         return self.rank.value < other.rank.value
@@ -78,7 +89,8 @@ class Card:
 
     def __str__(self):
         symbols = ["", u"\u2660", u"\u2661", u"\u2662", u"\u2663"]
-        vals = ["0", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+        vals = ["0", "A", "2", "3", "4", "5", "6",
+                "7", "8", "9", "10", "J", "Q", "K"]
         return "{} {}".format(symbols[self.suit.value], vals[self.rank.value])
 
     def show(self):
@@ -91,7 +103,10 @@ class Card:
     def isIdentical(self, card):
         return card.uid() == self.uid()
 
+
 class Deck:
+    """Class representing a person"""
+
     def __init__(self, numDecks):
         self.cards = []
         for i in range(1, numDecks + 1):
@@ -118,6 +133,7 @@ class Deck:
     def show(self):
         for card in self.cards:
             card.show()
+
 
 class RiggedDeck(Deck):
     def __init__(self, numDecks):
