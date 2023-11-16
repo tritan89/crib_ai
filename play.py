@@ -8,4 +8,4 @@ p2 = Player_AI(2, False)
 player_list = [p1,p2]
 
 game1 = Cribbage(player_list)
-game1.playGame()
+game1.play_game()

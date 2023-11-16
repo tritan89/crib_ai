@@ -2,19 +2,15 @@
 
 ################################################################################
 #
-# File : PlayerRandom.py
+# File : MachineAI.py
 #
-# Description : A simple instantiation of a Player. Makes decisions randomly.
+# Description : A neural network AI that makes decisions.
 #
-# Notes : If this file is run, it instantiates an Arena and measures this agent's
-#         performance against Myrmidon.
 #
 # Dependencies:
 #    - Player.py (in local project)
 #    - Utilities.py (in local project)
 #    - Deck.py (in local project)
-#    - Arena.py (in local project)          * - for __name__ = '__main__' only
-#    - Myrmidon.py (in local project)       * - for __name__ = '__main__' only
 #    - numpy (standard python library)      * - for __name__ = '__main__' only
 #    - random (standard python library)
 #    - matplotlib (standard python library) * - for __name__ = '__main__' only
@@ -26,17 +22,16 @@ import random
 from Player import Player
 
 
-class PlayerRandom(Player):
-    '''A simple instantiation of a Player. Makes decisions randomly.'''
+class MachineAI(Player):
+    '''Machine learning AI'''
 
     def __init__(self, number, verboseFlag):
         super().__init__(number)
         self.verbose = verboseFlag
-        self.name = "Random"
+        self.name = "Machine"
 
-    # Randomly select two cards to throw into the crib
     def throw_crib_cards(self, num_cards, crib):
-        '''Returns a list of cards to throw to the crib'''
+        '''selects crib cards based on the highest scoring hand without the starter card'''
         crib_cards = []
 
         for _ in range(0, num_cards):
@@ -48,9 +43,8 @@ class PlayerRandom(Player):
 
         return crib_cards
 
-    # Randomly select a card to play while making sure that it won't put the count over 31
     def play_card(self, game_state):
-        '''Returns a card to play'''
+        '''selects a card to play while making sure that it won't put the count over 31'''
 
         card_indices = list(range(0, len(self.play_hand)))
         played_card = None

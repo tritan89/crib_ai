@@ -27,7 +27,6 @@
 from Utilities import cardsString
 from Deck import Card
 from Scoring import scoreCards, getScore
-from Arena import Arena
 
 # Player imports
 from Player import Player
@@ -190,61 +189,3 @@ class Myrmidon(Player):
     def show(self):
         print('{}:'.format(self.getName()))
         print('Hand:' + cardsString(sorted(self.playhand)))
-
-if __name__ == '__main__':
-    # Initialize variables
-    player1 = Myrmidon(1,5,False)
-    player2 = Myrmidon(2,5,False)
-    numHands = 5000
-    repeatFlag = False
-    windowSize = 100
-        
-    # Create and run arena
-    arena = Arena([player1, player2],repeatFlag)
-    results = arena.playHands(numHands)
-    
-    # Plot results from arena
-    x = np.arange(1,numHands+1-windowSize,1)
-    y0 = np.zeros(len(results[0])-windowSize)
-    avgResult0 = np.average(results[0])
-    mu0 = np.zeros(len(y0))
-    y1 = np.zeros(len(results[1])-windowSize)
-    avgResult1 = np.average(results[1])
-    mu1 = np.zeros(len(y1))
-    y2 = np.zeros(len(results[2])-windowSize)
-    avgResult2 = np.average(results[2])
-    mu2 = np.zeros(len(y2))
-    
-    for i in range(len(x)):
-        y0[i] = np.average(results[0][i:i+windowSize])
-        mu0[i] = np.average(avgResult0)
-        y1[i] = np.average(results[1][i:i+windowSize])
-        mu1[i] = np.average(avgResult1)
-        y2[i] = np.average(results[2][i:i+windowSize])
-        mu2[i] = np.average(avgResult2)
-    
-    fig, (ax0,ax1,ax2) = plt.subplots(3, 1, sharex='col')
-    fig.set_size_inches(7, 6.5)
-    
-    moveAvg, = ax0.plot(x,y0,label='Moving Average')
-    fullAvg, = ax0.plot(x,mu0,label='Trial Average\n({0:2f} points)'.format(avgResult0))
-    ax0.set(ylabel='Pegging Differential', title="Myrmidon (5 Simulations) vs. Myrmidon (5 Simulations)\n(Moving Average Window Size = {0})".format(windowSize))
-    ax0.grid()
-    ax0.legend(handles=[moveAvg,fullAvg],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-    
-    moveAvg, = ax1.plot(x,y1,label='Moving Average')
-    fullAvg, = ax1.plot(x,mu1,label='Trial Average\n({0:2f} points)'.format(avgResult1))
-    ax1.set(ylabel='Hand Differential')
-    ax1.grid()
-    ax1.legend(handles=[moveAvg,fullAvg],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-    
-    moveAvg, = ax2.plot(x,y2,label='Moving Average')
-    fullAvg, = ax2.plot(x,mu2,label='Trial Average\n({0:2f} points)'.format(avgResult2))
-    ax2.set(xlabel='Hand Number', ylabel='Total Differential')
-    ax2.grid()
-    ax2.legend(handles=[moveAvg,fullAvg],bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-    
-    plt.tight_layout()
-
-    fig.savefig("myrmidon_ns05_LearningCurveNonStationary.png")
-    plt.show()
