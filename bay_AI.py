@@ -26,7 +26,7 @@
 from Player import Player
 from Utilities import *
 from Deck import Card,RiggedDeck
-from Arena import Arena
+
 
 # Player imports
 from Myrmidon import Myrmidon
