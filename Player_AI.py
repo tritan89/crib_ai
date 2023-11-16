@@ -27,7 +27,7 @@ from Player import Player
 from Utilities import *
 from Deck import Card,RiggedDeck, Deck
 from Arena import Arena
-from Scoring import getScoreNoStarter, getScore
+from Scoring import getScoreNoStarter, getScore, scoreCards
 
 # Player imports
 from Myrmidon import Myrmidon
@@ -94,20 +94,21 @@ class Player_AI(Player):
         return deck
 
     def __CribCardsWithstarter__(self):
-        possible_hands = combinations(self.hand, 4)
-        deck = self.get_deck_without_hand(self.hand)
-        scores = []
-        for hand in possible_hands: 
-            hand = list(hand)
-            crib_cards = [x for x in self.hand if x not in hand]
-            scores_with_card=[]
-            for card in deck.cards: # check every card in the deck with the hand given
-                hand_score = getScore(hand, card, False)
-                
-                scores_with_card.append([hand, hand_score, card, crib_cards]) #create a list of lists with the hand, score, starter card, and crib cards
-            scores.append(scores_with_card)
-        return self.analyzeCribCards(scores)
-
+            possible_hands = combinations(self.hand, 4)
+            deck = self.get_deck_without_hand(self.hand)
+            bestHand = []
+            scores = []
+            for hand in possible_hands: 
+                hand = list(hand)
+                crib_cards = [x for x in self.hand if x not in hand]
+                scores_with_card=[]
+                for card in deck.cards: # check every card in the deck with the hand given
+                    hand_score = getScore(hand, card, False)
+                    
+                    scores_with_card.append([hand, hand_score, card, crib_cards]) #create a list of lists with the hand, score, starter card, and crib cards
+                scores.append(scores_with_card)
+            return self.analyzeCribCards(scores)
+    
 
 
         
@@ -131,7 +132,7 @@ class Player_AI(Player):
         return cribCards
 
     # Randomly select a card to play while making sure that it won't put the count over 31
-    def playCard(self, gameState):
+    def playCard2(self, gameState):
         handSize = len(self.playhand)
         cardIndices = list(range(0, handSize))
         count = gameState['count']
@@ -155,6 +156,46 @@ class Player_AI(Player):
 
         return playedCard
     
+    # Randomly select a card to play while making sure that it won't put the count over 31
+    
+    def playCard2(self, gameState):
+        selected_card = None
+        count = gameState['count']
+        for card in self.playhand:
+            if count == 0:
+                if card.value() < 5:
+                    selected_card = card
+                    break
+            if count < 15:
+                if card.value() + count >= 15:
+                    selected_card = card
+                    break
+            if count > 15:
+                if card.value() + count < 31:
+                    selected_card = card
+                    break
+        return selected_card
+    
+    def playCard(self, gameState):
+        selected_card = None
+        count = gameState['count']
+        countCards = gameState['inplay']
+        card_scores = np.zeros(len(self.playhand))
+        for card, i in self.playhand.enumerate():
+            played_cards_new = countCards.append(card)
+            if card.value() + count <= 31:
+                card_scores[i] += 10 * scoreCards(played_cards_new, False) + self.playhand[i].rank.value
+                if (card.value() + count == 10) or (card.value() + count == 5) or (card.value() + count == 21):
+                    card_scores[i] = max(1, card_scores[i] - 10)
+                if card.value() + count <= 5:
+                    card_scores[i] += 15
+        if np.amax(card_scores) > 0:
+            selected_card = self.playhand.pop(max(range(len(card_scores)), key=card_scores.__getitem__))
+        return selected_card
+    
+    
+
+
     def checkForNonPlayableCard(self, cardIndex, count):
         if count + self.playhand[cardIndex].value() > 31:
             return True
