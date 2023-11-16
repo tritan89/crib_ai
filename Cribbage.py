@@ -178,7 +178,7 @@ class Cribbage:
                     f"Scoring {player.get_name()}'s hand: {cardsString(player.hand)} + {str(self.starter)}")
                 print(f"\t{player.get_name()}'s hand scored {score}")
 
-        if not (self.check_win()):
+        if not self.check_win():
             crib_score = getScore(self.crib, self.starter, self.verbose)
             self.players[self.dealer].pips += crib_score
             if self.verbose:
@@ -209,19 +209,19 @@ class Cribbage:
         to_play = (self.dealer + 1) % len(self.players)
         self.play_order = []
         # as long as any player has cards in hand, and the game isn't over
-        while (any(len(player.play_hand) > 0 for player in self.players)) and (not (self.check_win())):
+        while (any(len(player.play_hand) > 0 for player in self.players)) and not self.check_win():
             self.in_play = []  # those cards that affect the current count
             count = 0  # the current count
             go_counter = 0  # a counter for the number of consecutive "go"s
 
-            while (count < 31) and (go_counter < 2) and (not (self.check_win())):
+            while (count < 31) and (go_counter < 2) and (not self.check_win()):
                 if self.verbose:
                     print(
                         f"It is { self.players[to_play].get_name()}'s turn. Score is + {self.score_string()} ")
                 # Call on agent to choose a card
-                if to_play == 0 and not (self.critic is None):
+                if to_play == 0 and not self.critic is None:
                     critic_card = self.critic.play_card(self.game_state())
-                    if not (critic_card is None):
+                    if not critic_card is None:
                         self.critic.play_hand.append(critic_card)
                 else:
                     critic_card = None
@@ -237,7 +237,7 @@ class Cribbage:
                             print(
                                 f"{self.players[to_play].get_name()} scores 1 for the go.\n")
                 else:
-                    if not critic_card is None:
+                    if not critic_card is None and not self.critic is None:
                         if not critic_card.is_identical(played_card):
                             self.players[0].explain_play()
                             self.critic.explain_play()
@@ -254,7 +254,7 @@ class Cribbage:
                         self.in_play, self.verbose)
                     go_counter = 0
 
-                to_play = ((to_play + 1) % len(self.players))
+                to_play = (to_play + 1) % len(self.players)
                 # Allow agent to learn from the previous round of plays
                 self.players[to_play].learn_from_pegging(self.game_state())
 
@@ -277,7 +277,7 @@ class Cribbage:
 
     def restore_deck(self):
         '''Restores the deck to its original state and passes the deal to the next player'''
-        self.dealer = ((self.dealer + 1) % len(self.players))
+        self.dealer = (self.dealer + 1) % len(self.players)
         self.create_deck()
         self.crib = []
         self.starter = []
