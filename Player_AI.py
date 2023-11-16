@@ -128,7 +128,7 @@ class Player_AI(Player):
         return cribCards
 
     # Randomly select a card to play while making sure that it won't put the count over 31
-    def play_card(self, game_state):
+    def play_card3(self, game_state):
         handSize = len(self.play_hand)
         cardIndices = list(range(0, handSize))
         count = game_state['count']
@@ -153,41 +153,25 @@ class Player_AI(Player):
 
         return playedCard
     
-    # Randomly select a card to play while making sure that it won't put the count over 31
     
-    def playCard2(self, gameState):
-        selected_card = None
-        count = gameState['count']
-        for card in self.playhand:
-            if count == 0:
-                if card.value() < 5:
-                    selected_card = card
-                    break
-            if count < 15:
-                if card.value() + count >= 15:
-                    selected_card = card
-                    break
-            if count > 15:
-                if card.value() + count < 31:
-                    selected_card = card
-                    break
-        return selected_card
     
-    def playCard(self, gameState):
+    def play_card(self, game_state):
         selected_card = None
-        count = gameState['count']
-        countCards = gameState['inplay']
-        card_scores = np.zeros(len(self.playhand))
-        for card, i in self.playhand.enumerate():
-            played_cards_new = countCards.append(card)
-            if card.value() + count <= 31:
-                card_scores[i] += 10 * scoreCards(played_cards_new, False) + self.playhand[i].rank.value
-                if (card.value() + count == 10) or (card.value() + count == 5) or (card.value() + count == 21):
-                    card_scores[i] = max(1, card_scores[i] - 10)
-                if card.value() + count <= 5:
-                    card_scores[i] += 15
-        if np.amax(card_scores) > 0:
-            selected_card = self.playhand.pop(max(range(len(card_scores)), key=card_scores.__getitem__))
+        count = game_state['count']
+        countCards = game_state['in_play']
+        card_scores = np.zeros(len(self.play_hand))
+        if len(self.play_hand) != 0:
+            for i in range(0, len(self.play_hand)):
+                if self.play_hand[i].value() + count <= 31:
+                    played_cards_new = countCards+ [self.play_hand[i]]
+                    print('played_cards_new', played_cards_new)
+                    card_scores[i] += 10 * scoreCards(played_cards_new, False) + self.play_hand[i].rank.value
+                    if (self.play_hand[i].value() + count == 10) or (self.play_hand[i].value() + count == 5) or (self.play_hand[i].value() + count == 21):
+                        card_scores[i] = max(1, card_scores[i] - 10)
+                    if self.play_hand[i].value() + count <= 5:
+                        card_scores[i] += 15
+            if np.amax(card_scores) > 0:
+                selected_card = self.play_hand.pop(max(range(len(card_scores)), key=card_scores.__getitem__))
         return selected_card
     
     
