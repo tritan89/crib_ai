@@ -113,7 +113,7 @@ class Player_AI(Player):
         return cribCards
 
     # Randomly select a card to play while making sure that it won't put the count over 31
-    def play_card(self, game_state):
+    def play_card3(self, game_state):
         handSize = len(self.play_hand)
         cardIndices = list(range(0, handSize))
         count = game_state['count']
