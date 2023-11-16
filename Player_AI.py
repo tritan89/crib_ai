@@ -25,8 +25,7 @@
 from calendar import c
 from Player import Player
 from Utilities import *
-from Deck import Card,RiggedDeck, Deck
-from Arena import Arena
+from Deck import Deck
 from Scoring import getScoreNoStarter, getScore, scoreCards
 
 # Player imports
@@ -129,7 +128,7 @@ class Player_AI(Player):
         return cribCards
 
     # Randomly select a card to play while making sure that it won't put the count over 31
-    def playCard(self, gameState):
+    def play_card(self, game_state):
         handSize = len(self.play_hand)
         cardIndices = list(range(0, handSize))
         count = game_state['count']
