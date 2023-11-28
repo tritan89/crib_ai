@@ -8,11 +8,11 @@
 # Description : An abstract class defining what methods a player class must have
 #               in order to play well with Cribbage.py.
 #
-# Notes : Abstract methods are: throwCribCards, playCard, learnFromHandScores,
+# Notes : Abstract methods are: throw_crib_cards, play_card, learnFromHandScores,
 #         and learnFromPegging
 #
 #         The verboseFlag is used to control whether or not the print commands
-#         are used throughout the file. 
+#         are used throughout the file.
 #
 # Dependencies:
 #    - Deck.py (in local project)
@@ -23,84 +23,97 @@
 from abc import ABC, abstractmethod
 from Deck import Card
 
+
 class Player(ABC):
+    '''Abstract class defining what methods a player class must have in order to'''
+
     def __init__(self, number, verbose=False):
         self.hand = []
-        self.playhand = []
+        self.play_hand = []
         self.number = number
         self.pips = 0
         self.name = "Generic Player"
         self.verbose = verbose
 
-    def newGame(self, gameState):
-        self.reset(gameState)
+    def new_game(self):
+        '''Resets the player's hand and pips for a new game'''
+        self.reset()
         self.pips = 0
 
-    def reset(self, gameState=None):
+    def reset(self):
+        '''Resets the player's hand for a new hand'''
         self.hand = []
-        self.playhand = []
+        self.play_hand = []
 
-    def removeCard(self, card):
-        for i in range(0,len(self.playhand)):
-            if self.playhand[i].isIdentical(card):
-                self.playhand.pop(i)
+    def remove_card(self, card):
+        '''Removes the argument card from the player's hand'''
+        for card in self.play_hand:
+            if card.isIdentical(card):
+                self.play_hand.remove(card)
                 return
-        print("Tried to remove the {} from {}'s playhand, but it wasn't there!".format(str(card),self.getName()))
+
+        print(
+            f"Tried to remove the { str(card)} from {self.get_name()}'s play_hand, but it wasn't there!")
 
     @abstractmethod
-    def throwCribCards(self, numCards, crib):
-        pass
+    def throw_crib_cards(self, num_cards, crib):
+        '''Returns a list of cards to throw to the crib'''
 
     @abstractmethod
-    def playCard(self, gameState):
-        pass
+    def play_card(self, game_state):
+        '''Returns a card to play'''
 
     @abstractmethod
-    def explainThrow(self):
-        pass
-    
-    @abstractmethod
-    def explainPlay(self):
-        pass
+    def explain_throw(self):
+        '''Prints the cards thrown to the console'''
 
     @abstractmethod
-    def learnFromHandScores(self, scores, gameState):
-        pass
-    
+    def explain_play(self):
+        '''Prints the card played to the console'''
+
     @abstractmethod
-    def learnFromPegging(self, gameState):
-        pass
+    def learn_from_hand_scores(self, scores, game_state):
+        '''Updates the player's knowledge based on the scores from the hand'''
 
-    def endOfGame(self, gameState):
-        pass
+    @abstractmethod
+    def learn_from_pegging(self, game_state):
+        '''Updates the player's knowledge based on the pegging'''
 
-    def thirtyOne(self, gameState):
-        pass
+    def end_of_game(self, game_state):
+        '''end_of_game is called at the end of the game to allow the player to reset'''
 
-    def go(self, gameState):
-        pass
+    def thirty_one(self, game_state):
+        '''thirty_one is called when the player scores 31 points'''
 
-    def createPlayHand(self):
-        for i in range(0, len(self.hand)):
-            self.playhand.append(Card(self.hand[i].rank, self.hand[i].suit))
+    def go(self, game_state):
+        '''go is called when the player says "go"'''
 
-    def getRelativeScore(self, gameState):
+    def create_play_hand(self):
+        '''Creates a copy of the player's hand to be used for pegging'''
+        for card in self.hand:
+            self.play_hand.append(Card(card.rank, card.suit))
+
+    def get_relative_score(self, game_state):
+        '''Returns the score of the player relative to the other player'''
         score = 0
         try:
             if self.number == 1:
-                score = gameState['scores'][0] - gameState['scores'][1]
-            else:
-                score = gameState['scores'][1] - gameState['scores'][0]
-        except:
-            print('Problems')
-        finally:
-            return score
 
-    def getName(self):
-        return str(self.name + "({0})".format(self.number))
+                score = game_state['scores'][0] - game_state['scores'][1]
+            else:
+                score = game_state['scores'][1] - game_state['scores'][0]
+        except TypeError as e:
+            print(f'Error occurred: {e}')
+
+        return score
+
+    def get_name(self):
+        '''Returns the name of the player'''
+        return str(self.name + f"({self.number})")
 
     def __str__(self):
-        hand = "{}: ".format(self.getName())
+        ''' Returns a string representation of the player's hand'''
+        hand = f"{self.get_name()}: "
         for card in self.hand:
             hand = hand + str(card) + ", "
 
@@ -108,19 +121,23 @@ class Player(ABC):
         return hand
 
     def show(self):
-        print("{} has scored {} pips.".format(self.getName(), self.pips))
+        '''Prints the player's hand to the console'''
+        print(f"{self.get_name()} has scored {self.pips} pips.")
         if self.hand:
             print("Current hand is:")
             for card in self.hand:
-                print("\t{}".format(str(card)))
+                print(f"\t{str(card)}")
         else:
             print("Current hand is empty.")
 
-    def isInHand(self, checkCard):
-        return checkCard in self.hand
+    def is_in_hand(self, check_card):
+        '''Returns true if the card is in the player's hand'''
+        return check_card in self.hand
 
-    def isInPlayHand(self, checkCard):
-        return checkCard in self.playhand
+    def is_in_play_hand(self, check_card):
+        '''Returns true if the card is in the player's play hand'''
+        return check_card in self.play_hand
 
     def draw(self, deck):
+        '''Draws a card from the deck and adds it to the player's hand'''
         self.hand.append(deck.cards.pop())

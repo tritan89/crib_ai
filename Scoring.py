@@ -21,10 +21,10 @@
 #
 ################################################################################
 
+from itertools import combinations
 from Deck import *
 from Utilities import *
-from itertools import combinations
-from math import factorial
+# from math import factorial
 
 # These functions score a given hand and starter card.
 def getScore(hand, starter, verbose):

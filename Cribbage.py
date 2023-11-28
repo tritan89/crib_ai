@@ -14,7 +14,7 @@
 #         the game does not have a conception of players being on the same team.
 #
 #         The verboseFlag is used to control whether or not the print commands
-#         are used throughout the file. 
+#         are used throughout the file.
 #
 # Dependencies:
 #    - Deck.py (in local project)
@@ -25,126 +25,148 @@
 ################################################################################
 
 # Cribbage imports
-from Deck import Rank,Deck,RiggedDeck
-from Scoring import getScore,scoreCards
+import random
+from Deck import Rank, Deck
+from Scoring import getScore, scoreCards
 
 # Utility imports
-from Utilities import cardsString,areCardsEqual
-import random 
+from Utilities import cardsString, areCardsEqual
+
 
 class Cribbage:
-    def __init__(self, playerArray, critic = None, verboseFlag = True, rigged=False):
+    '''Class representing a game of cribbage'''
+
+    def __init__(self, player_array, critic=None, verbose_flag=False, rigged=False):
         # Build a single standard deck
         self.rigged = rigged
-        self.createDeck()
+        self.create_deck()
         # Initialize and empty crib
         self.crib = []
         # Initialize a holder for the cut card
         self.starter = []
         # Initialize the list of played cards
-        self.playorder = []
+        self.play_order = []
         # Initialize the list of cards currently counting
-        self.inplay = []
+        self.in_play = []
         # Randomly select which player starts with the crib
         # also the dealer
-        self.dealer = random.randint(0, len(playerArray) - 1)
+        self.dealer = random.randint(0, len(player_array) - 1)
         # initialize the players
-        self.players = playerArray
+        self.players = player_array
         self.critic = critic
 
         # determine how much printing should occur
-        self.verbose = verboseFlag
+        self.verbose = verbose_flag
 
-    # Reset the game's state, but keep the same players. For use during extended
-    # training sessions between players.
-    def resetGame(self):
-        self.createDeck()
+    def reset_game(self):
+        '''Reset the game's state, but keep the same players. For use during extended'''
+        self.create_deck()
         self.deck.shuffle()
         self.crib = []
         self.starter = []
-        self.playorder = []
+        self.play_order = []
+        self.in_play =[]
         self.dealer = random.choice(range(len(self.players)))
         for player in self.players:
-            player.newGame(self.gameState())
+            player.reset()
 
-    # Create and return a dictionary structure capturing the game's state. For
-    # use by agents to learn or make decisions.
-    def gameState(self):
+    def game_state(self):
+        '''Returns a dictionary representing the state of the game'''
         state = dict()
         scores = [player.pips for player in self.players]
         state['scores'] = scores
-        numCards = [len(player.playhand) for player in self.players]
-        state['numCards'] = numCards
-        state['inplay'] = self.inplay
-        state['playorder'] = self.playorder
+        num_cards = [len(player.play_hand) for player in self.players]
+        state['num_cards'] = num_cards
+        state['in_play'] = self.in_play
+        state['play_order'] = self.play_order
         state['dealer'] = self.dealer
         state['starter'] = self.starter
-        state['count'] = sum([card.value() for card in self.inplay])
+        state['count'] = sum([card.value() for card in self.in_play])
 
         return state
 
-    # Check to see if any player has won
-    def checkWin(self):
+    def check_win(self):
+        '''Returns the number of the player who has won, or 0 if no one has won yet'''
         for player in self.players:
             if player.pips > 120:
                 return player.number
-        else:
-            return 0
+        return 0
 
-    # Play a single hand of cribbage
-    def playHand(self):
+    def play_hand(self):
+        '''Plays a single hand of cribbage'''
         self.deal()
-        self.createCrib()
+        self.create_crib()
         self.cut()
         if self.verbose:
             self.show()
         self.play()
-        
-        self.scoreHands()
-        if self.verbose:
-            print("Score is " + self.scoreString())
-            print("*******************************")
-        self.restoreDeck()
-        for player in self.players:
-            player.reset(self.gameState())
 
-    # Play a complete game of cribbage - first to 121 wins!
-    def playGame(self):
-        while not (self.checkWin()):
-            self.playHand()
-            
-        print("{} wins! The final score was ".format(self.players[self.checkWin() - 1].getName()) + self.scoreString())
+        self.score_hands()
+        if self.verbose:
+            print("Score is " + self.score_string())
+            print("*******************************")
+        self.restore_deck()
+        for player in self.players:
+            player.reset()
+
+    def play_hand_test(self):
+        self.deal()
+        self.create_crib()
+        self.cut()
+        if self.verbose:
+            self.show()
+        self.play()
+        self.score_hands()
+        
+        score1 = self.players[1].pips
+        score0 = self.players[0].pips
+        for player in self.players:
+            player.reset()
+        self.restore_deck()
+        return score0, score1
+
+    def play_game(self):
+        '''Plays a complete game of cribbage'''
+        while not self.check_win():
+            self.play_hand()
+
+        print(
+            f"{self.players[self.check_win() - 1].get_name()} wins! The final score was {self.score_string()} ")
+
         return self.players[0].pips - self.players[1].pips
 
-    # Deal the initial hands to each player
     def deal(self):
+        '''Deals the initial hands to each player'''
         # Shuffle the deck
         self.deck.shuffle()
         # deal 6 cards to each player, starting to the left of the dealer
-        dealOrder = [x % len(self.players) for x in range(self.dealer + 1, self.dealer + len(self.players) + 1)]
-        for i in range(6):
-            for player in dealOrder:
+        deal_order = [x % len(self.players) for x in range(
+            self.dealer + 1, self.dealer + len(self.players) + 1)]
+        for _ in range(6):
+            for player in deal_order:
                 self.players[player].draw(self.deck)
 
-    # Each player throws cards into the crib. For 2-player cribbage, each
-    # player throws 2 cards into the crib.
-    def createCrib(self):
+    def create_crib(self):
+        '''Creates the crib'''
+
+        # Each player throws cards into the crib. For 2-player cribbage, each
+        # player throws 2 cards into the crib.
         for player in self.players:
-            thrown = player.throwCribCards(2, self.gameState())
-            
-            if not(self.critic is None) and player.number == 1:
-                criticThrows = self.critic.throwCribCards(2,self.gameState())
-                if not(areCardsEqual(criticThrows,thrown)):
-                    self.players[0].explainThrow()
-                    self.critic.explainThrow()
+            thrown = player.throw_crib_cards(2, self.game_state())
+
+            if not (self.critic is None) and player.number == 1:
+                critic_throws = self.critic.throw_crib_cards(
+                    2, self.game_state())
+                if not areCardsEqual(critic_throws, thrown):
+                    self.players[0].explain_throw()
+                    self.critic.explain_throw()
             if self.verbose:
-                print("{} threw 2 cards into the crib.".format(player.getName()))
+                print(f"{player.get_name()} threw 2 cards into the crib.")
             for card in thrown:
                 self.crib.append(card)
 
-    # Cut the deck to determine the starter card that will be added to all hands
-    # If a card is passed as an argument then it is used as the cut card.
     def cut(self, card=None):
+        '''Cuts the deck to determine the starter card'''
         if card is None:
             # Cut the deck
             self.deck.cut()
@@ -156,137 +178,140 @@ class Cribbage:
         if self.starter.rank is Rank.Jack:
             self.players[self.dealer].pips += 2
             if self.verbose:
-                print("{} scores 2 for nobs!".format(self.players[self.dealer].getName()))
+                print(
+                    f"{ self.players[self.dealer].get_name()} scores 2 for nobs!")
 
-    # Score hands in the proper order    
-    def scoreHands(self):
+    # Score hands in the proper order
+    def score_hands(self):
+        '''Scores the hands and crib'''
         for i in range(self.dealer + 1, self.dealer + 1 + len(self.players)):
-            if self.checkWin():
+            if self.check_win():
                 break
             player = self.players[i % len(self.players)]
             score = getScore(player.hand, self.starter, self.verbose)
             player.pips += score
             if self.verbose:
-                print("Scoring {}'s hand: ".format(player.getName()) + cardsString(player.hand) + " + " + str(
-                    self.starter))
-                print("\t{}'s hand scored {}".format(player.getName(), score))
+                print(
+                    f"Scoring {player.get_name()}'s hand: {cardsString(player.hand)} + {str(self.starter)}")
+                print(f"\t{player.get_name()}'s hand scored {score}")
 
-        if not (self.checkWin()):
-            cribScore = getScore(self.crib, self.starter, self.verbose)
-            self.players[self.dealer].pips += cribScore
+        if not self.check_win():
+            crib_score = getScore(self.crib, self.starter, self.verbose)
+            self.players[self.dealer].pips += crib_score
             if self.verbose:
                 print(
-                    "In {}'s crib: ".format(self.players[self.dealer].getName()) + cardsString(self.crib) + " + " + str(
-                        self.starter))
-                print("{} scored {} in the crib!\n\n".format(self.players[self.dealer].getName(), cribScore))
-        
+                    f"In {self.players[self.dealer].get_name()}'s crib: {cardsString(self.crib)} + {str(self.starter)}")
+                print(
+                    f"{self.players[self.dealer].get_name()} scored {crib_score} in the crib!\n\n")
+
         for player in self.players:
-            player.learnFromHandScores([getScore(self.players[0].hand, self.starter, False), getScore(self.players[1].hand, self.starter, False), getScore(self.crib, self.starter, False)], self.gameState())
+            player.learn_from_hand_scores([getScore(self.players[0].hand, self.starter, False), getScore(
+                self.players[1].hand, self.starter, False), getScore(self.crib, self.starter, False)], self.game_state())
 
-    # Play the pegging phase of the game
     def play(self):
+        '''Plays the pegging phase of the game'''
         if self.verbose:
-            print("{} dealt this hand.".format(self.players[self.dealer].getName()))
-        
-        if not(self.critic is None):
-            self.critic.playhand = []
-            for i in range(0,4):
-                self.critic.playhand.append(self.players[0].playhand[i])
-            #self.players[0].show()
-            #self.critic.show()
-        
-        self.playorder = []
-        
+            print(f"{self.players[self.dealer].get_name()} dealt this hand.")
+
+        if not self.critic is None:
+            self.critic.play_hand = []
+            for i in range(0, 4):
+                self.critic.play_hand.append(self.players[0].play_hand[i])
+            # self.players[0].show()
+            # self.critic.show()
+
+        self.play_order = []
+
         # Starting player is not the dealer
-        toPlay = (self.dealer + 1) % len(self.players)
-        self.playorder = []
+        to_play = (self.dealer + 1) % len(self.players)
+        self.play_order = []
         # as long as any player has cards in hand, and the game isn't over
-        while (any(len(player.playhand) > 0 for player in self.players)) and (not (self.checkWin())):
-            self.inplay = []  # those cards that affect the current count
+        while (any(len(player.play_hand) > 0 for player in self.players)) and not self.check_win():
+            self.in_play = []  # those cards that affect the current count
             count = 0  # the current count
-            goCounter = 0  # a counter for the number of consecutive "go"s
+            go_counter = 0  # a counter for the number of consecutive "go"s
 
-            while (count < 31) and (goCounter < 2) and (not (self.checkWin())):
+            while (count < 31) and (go_counter < 2) and (not self.check_win()):
                 if self.verbose:
-                    print("It is {}'s turn. Score is ".format(self.players[toPlay].getName()) + self.scoreString())
+                    print(
+                        f"It is { self.players[to_play].get_name()}'s turn. Score is + {self.score_string()} ")
                 # Call on agent to choose a card
-                if toPlay == 0 and not(self.critic is None):
-                    criticCard = self.critic.playCard(self.gameState())
-                    if not(criticCard is None):
-                        self.critic.playhand.append(criticCard)
+                if to_play == 0 and not self.critic is None:
+                    critic_card = self.critic.play_card(self.game_state())
+                    if not critic_card is None:
+                        self.critic.play_hand.append(critic_card)
                 else:
-                    criticCard = None
-                playedCard = self.players[toPlay].playCard(self.gameState())
-                if playedCard is None:
-                    if goCounter == 0:
-                        goCounter = 1
+                    critic_card = None
+                played_card = self.players[to_play].play_card(
+                    self.game_state())
+                if played_card is None:
+                    if go_counter == 0:
+                        go_counter = 1
                     else:
-                        goCounter = 2
-                        self.players[toPlay].pips += 1
+                        go_counter = 2
+                        self.players[to_play].pips += 1
                         if self.verbose:
-                            print("{} scores 1 for the go.\n".format(self.players[toPlay].getName()))
+                            print(
+                                f"{self.players[to_play].get_name()} scores 1 for the go.\n")
                 else:
-                    if not(criticCard is None):
-                        if not(criticCard.isIdentical(playedCard)):
-                            self.players[0].explainPlay()
-                            self.critic.explainPlay()
+                    if not critic_card is None and not self.critic is None:
+                        if not critic_card.is_identical(played_card):
+                            self.players[0].explain_play()
+                            self.critic.explain_play()
                         else:
-                            print("{} agrees with {}'s play.".format(self.critic.getName(),self.players[0].getName()))
-                        self.critic.removeCard(playedCard)
-                    count += playedCard.value()
-                    self.inplay.append(playedCard)
-                    self.playorder.append(playedCard)
+                            print(
+                                f"{self.critic.get_name()} agrees with {self.players[0].get_name()}'s play.")
+                        self.critic.remove_card(played_card)
+                    count += played_card.value()
+                    self.in_play.append(played_card)
+                    self.play_order.append(played_card)
                     if self.verbose:
-                        print("\t{}: ".format(count) + cardsString(self.inplay))
-                    self.players[toPlay].pips += scoreCards(self.inplay, self.verbose)
-                    goCounter = 0
+                        print(f"\t{count}: {cardsString(self.in_play)}")
+                    self.players[to_play].pips += scoreCards(
+                        self.in_play, self.verbose)
+                    go_counter = 0
 
-                toPlay = ((toPlay + 1) % len(self.players))
+                to_play = (to_play + 1) % len(self.players)
                 # Allow agent to learn from the previous round of plays
-                self.players[toPlay].learnFromPegging(self.gameState())
+                self.players[to_play].learn_from_pegging(self.game_state())
 
-            if goCounter == 2:
+            if go_counter == 2:
                 # A go has happened
                 for player in self.players:
-                    player.go(self.gameState())
+                    player.go(self.game_state())
 
             if count == 31:
-                pass
                 # A 31 has happened
                 for player in self.players:
-                    player.thirtyOne(self.gameState())
+                    player.thirty_one(self.game_state())
 
-            if self.checkWin():
+            if self.check_win():
                 # Someone won
                 for player in self.players:
-                    player.endOfGame(self.gameState())
+                    player.end_of_game(self.game_state())
                 if self.verbose:
                     print('Game Over!')
 
-    # Restore the deck after a hand and "pass it" to the next dealer
-    def restoreDeck(self):
-        self.dealer = ((self.dealer + 1) % len(self.players))
-        self.createDeck()
+    def restore_deck(self):
+        '''Restores the deck to its original state and passes the deal to the next player'''
+        self.dealer = (self.dealer + 1) % len(self.players)
+        self.create_deck()
         self.crib = []
         self.starter = []
-        self.playorder = []
+        self.play_order = []
 
-    # Initalizes own deck depending on whether or not a rigged deck should be used
-    def createDeck(self):
-        if self.rigged:
-            self.deck = RiggedDeck(1)
-        else:
-            self.deck = Deck(1)
+    def create_deck(self):
+        '''Creates a deck of cards'''
+        self.deck = Deck(1)
 
-    # Utility functions
-    def scoreString(self):
+    def score_string(self):
+        '''Returns a string representing the current score'''
         return str(self.players[0].pips) + " - " + str(self.players[1].pips)
 
-    # Prints out the cards held by each player, the starter card and the cards
-    # that have been thrown into the crib
     def show(self):
+        '''Prints the current state of the game to the console'''
         for player in self.players:
             print(player)
-            
+
         print("Cut: " + str(self.starter))
         print("Crib: " + cardsString(self.crib))
