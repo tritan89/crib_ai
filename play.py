@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from re import M
+# from re import M
 from Cribbage import Cribbage
 from MachineAI import MachineAI
-from PlayerRandom import PlayerRandom
+# from PlayerRandom import PlayerRandom
 from Player_AI import Player_AI
 
 # p1 = PlayerRandom(1,False)

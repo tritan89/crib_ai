@@ -21,7 +21,6 @@
 ################################################################################
 
 from abc import ABC, abstractmethod
-from os import error
 from Deck import Card
 
 

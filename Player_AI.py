@@ -102,8 +102,6 @@ class Player_AI(Player):
 
     # Function to pass crib card to play hand
     def throw_crib_cards(self, num_cards, game_state):
-        print('game_state', game_state)
-
         # Function to determine which cards to throw into the crib
         self.hand, cribCards = self.__CribCardsWithstarter__()
         if self.verbose:
@@ -122,7 +120,6 @@ class Player_AI(Player):
         playedCard = None
 
         while playedCard is None:
-
             if (self.checkForEmptyHand()):
                 return None
 

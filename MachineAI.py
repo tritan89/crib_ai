@@ -190,8 +190,6 @@ class MachineAI(Player):
     def sa_values(self, state):
         '''Returns the action values for the given state'''
         action_values = [0, 0, 0, 0]
-
-        print('state', state)
         try:
             if isinstance(state[1], list):
                 action_values = self.peg_brain.predict(state)
@@ -219,15 +217,12 @@ class MachineAI(Player):
             G = 0
             for i in reversed(range(len(self.episode_states))):
                 try:
-                    # type: ignore
                     Gt[i] = (self.gamma * G + self.episode_returns[i]) # type: ignore
                 except IndexError:
                     print("what is happening here?")
                 G = Gt[i]
                 Y[i][self.episode_actions[i]] = Gt[i]  # type: ignore
 
-            print('X', X)
-            print('Y', Y)
             self.peg_brain.partial_fit(X, Y)
             self.backup()
 
@@ -264,8 +259,6 @@ class MachineAI(Player):
 
     # PlayerRandom does not learn
     def learn_from_pegging(self, game_state):
-        print('learning from pegging-------------------------------------------------------------------------')
-
         if self.current_action == self.go_action_index:
             self.episode_returns[-1] += self.get_relative_score(
                 game_state) - self.prev_score
