@@ -95,8 +95,3 @@ class PlayerRandom(Player):
     # PlayerRandom does not learn
     def learn_from_pegging(self, game_state):
         pass
-    
-    def reset(self):
-        self.hand = []
-        self.play_hand = []
-        self.pips = 0
