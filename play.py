@@ -2,13 +2,13 @@
 # from re import M
 from Cribbage import Cribbage
 from MachineAI import MachineAI
-# from PlayerRandom import PlayerRandom
+from PlayerRandom import PlayerRandom
 from Player_AI import Player_AI
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 
-p1 = MachineAI(1,False)
+p1 = PlayerRandom(1,False)
 p2 = Player_AI(2, False)
 player_list = [p1,p2]
 
