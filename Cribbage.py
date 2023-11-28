@@ -36,7 +36,7 @@ from Utilities import cardsString, areCardsEqual
 class Cribbage:
     '''Class representing a game of cribbage'''
 
-    def __init__(self, player_array, critic=None, verbose_flag=True, rigged=False):
+    def __init__(self, player_array, critic=None, verbose_flag=False, rigged=False):
         # Build a single standard deck
         self.rigged = rigged
         self.create_deck()
@@ -65,9 +65,10 @@ class Cribbage:
         self.crib = []
         self.starter = []
         self.play_order = []
+        self.in_play =[]
         self.dealer = random.choice(range(len(self.players)))
         for player in self.players:
-            player.new_game()
+            player.reset()
 
     def game_state(self):
         '''Returns a dictionary representing the state of the game'''
@@ -107,6 +108,22 @@ class Cribbage:
         self.restore_deck()
         for player in self.players:
             player.reset()
+
+    def play_hand_test(self):
+        self.deal()
+        self.create_crib()
+        self.cut()
+        if self.verbose:
+            self.show()
+        self.play()
+        self.score_hands()
+        
+        score1 = self.players[1].pips
+        score0 = self.players[0].pips
+        for player in self.players:
+            player.reset()
+        self.restore_deck()
+        return score0, score1
 
     def play_game(self):
         '''Plays a complete game of cribbage'''

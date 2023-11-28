@@ -41,6 +41,7 @@ class Player_AI(Player):
         self.name = "AI"
 
     # selects crib cards based on the highest scoring hand without the starter card
+    # TODO convert to np array
     def __selectCribCards__(self):
         possible_hands = combinations(self.hand, 4)
         max_score = -1
@@ -57,6 +58,7 @@ class Player_AI(Player):
     # takes in a list of lists with the inner list containing a list with [hand, hand_score, card, crib_cards]
     # outermost list of list where each list contains a different hand
     # inner contains a list of the hand with every possible starter card and the score of that hand with that starter card
+    # TODO convert to np array
     def analyzeCribCards(self, scored_hands):
         bestHand = []
         avgResult = []
@@ -112,30 +114,27 @@ class Player_AI(Player):
 
         return cribCards
 
-    # Randomly select a card to play while making sure that it won't put the count over 31
-    def play_card3(self, game_state):
-        handSize = len(self.play_hand)
-        cardIndices = list(range(0, handSize))
+    def play_card(self, game_state):
+        selected_card = None
         count = game_state['count']
-        playedCard = None
+        countCards = game_state['in_play']
+        card_scores = np.zeros(len(self.play_hand))
+        if len(self.play_hand) != 0:
+            for i in range(0, len(self.play_hand)):
+                if self.play_hand[i].value() + count <= 31:
+                    played_cards_new = countCards + [self.play_hand[i]]
 
-        while playedCard is None:
-            if (self.checkForEmptyHand()):
-                return None
-
-            index = self.__selectCard__(handSize)
-            cardIndex = cardIndices[index]
-
-            if (self.checkForNonPlayableCard(cardIndex, count)):
-                if (self.checkForNoPlayableCards(cardIndices, index)):
-                    return None
-
-            playedCard = self.play_hand.pop(cardIndex)
-            if (self.verbose):
-                print("\tPlayer_AI ({}) played {}".format(
-                    self.number, str(playedCard)))
-
-        return playedCard
+                    card_scores[i] += 10 * \
+                        scoreCards(played_cards_new, False) + \
+                        self.play_hand[i].rank.value
+                    if (self.play_hand[i].value() + count == 10) or (self.play_hand[i].value() + count == 5) or (self.play_hand[i].value() + count == 21):
+                        card_scores[i] = max(1, card_scores[i] - 10)
+                    if self.play_hand[i].value() + count <= 5:
+                        card_scores[i] += 15
+            if np.amax(card_scores) > 0:
+                selected_card = self.play_hand.pop(
+                    max(range(len(card_scores)), key=card_scores.__getitem__))
+        return selected_card
 
     def checkForNonPlayableCard(self, cardIndex, count):
         if count + self.play_hand[cardIndex].value() > 31:
@@ -173,3 +172,8 @@ class Player_AI(Player):
     # Player_AI does not learn
     def learn_from_pegging(self, game_state):
         pass
+
+    def reset(self):
+        self.hand = []
+        self.play_hand = []
+        self.pips = 0
