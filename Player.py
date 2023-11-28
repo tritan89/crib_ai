@@ -21,6 +21,7 @@
 ################################################################################
 
 from abc import ABC, abstractmethod
+from os import error
 from Deck import Card
 
 
@@ -98,10 +99,11 @@ class Player(ABC):
         score = 0
         try:
             if self.number == 1:
+
                 score = game_state['scores'][0] - game_state['scores'][1]
             else:
                 score = game_state['scores'][1] - game_state['scores'][0]
-        except IndexError as e:
+        except TypeError as e:
             print(f'Error occurred: {e}')
 
         return score

@@ -67,7 +67,7 @@ class Cribbage:
         self.play_order = []
         self.dealer = random.choice(range(len(self.players)))
         for player in self.players:
-            player.newGame(self.game_state())
+            player.new_game()
 
     def game_state(self):
         '''Returns a dictionary representing the state of the game'''
