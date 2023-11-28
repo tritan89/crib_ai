@@ -15,48 +15,50 @@
 #    - random (standard python library)
 #
 ################################################################################
-
-# Cribbage imports
-from Deck import *
-
 # Utility imports
 import numpy as np
 import random
+# Cribbage imports
+from Deck import *
 
-# Formats a list of cards (usually a hand) as a string
-def cardsString(hand):
+# Formats
+def cards_string(hand):
     if len(hand) > 0:
         cstring = "("
         for card in hand:
             cstring += str(card) + ", "
         return cstring[:-2] + ")"
     else:
-        return "(EMPTY)"     
+        return "(EMPTY)"
 
 # Checks if two groups of cards (usually cards thrown into the crib) are the same
-def areCardsEqual(group1,group2):
-    if len(group1)==len(group2):
+
+
+def are_cards_equal(group1, group2):
+    if len(group1) == len(group2):
         group1.sort()
         group2.sort()
-        
-        for i in range(0,len(group1)):
-            if not(group1[i].isIdentical(group2[i])):
+
+        for i in range(0, len(group1)):
+            if not (group1[i].isIdentical(group2[i])):
                 return False
-            
+
         return True
     else:
         return False
-    
+
 
 # Calculates the policy for an array of values using a soft-max selection rule
 # see, for example, Sutton and Barto p. 37
-def softmax(x):
+def soft_max(x):
     s = np.exp(x) / np.sum(np.exp(x))
     return s
 
 # Calculates the policy for an array of values using an epsilon soft rule
 # see, for example, Sutton and Barto p. 101
-def epsilonsoft(x, epsilon):
+
+
+def epsilon_soft(x, epsilon):
     x = [val - min(x) for val in x]
     inds = [i for i, v in enumerate(x) if v == max(x)]
     ind = random.choice(inds)

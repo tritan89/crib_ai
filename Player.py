@@ -56,8 +56,8 @@ class Player(ABC):
             f"Tried to remove the { str(card)} from {self.get_name()}'s play_hand, but it wasn't there!")
 
     @abstractmethod
-    def throw_crib_cards(self, num_cards, crib):
-        '''Returns a list of cards to throw to the crib'''
+    def throw_crib_cards(self, num_cards, game_state):
+        '''Returns a list of cards to throw to the game_state'''
 
     @abstractmethod
     def play_card(self, game_state):
@@ -96,6 +96,8 @@ class Player(ABC):
     def get_relative_score(self, game_state):
         '''Returns the score of the player relative to the other player'''
         score = 0
+        print('game_state', game_state)
+        print(game_state['scores'])
         try:
             if self.number == 1:
                 score = game_state['scores'][0] - game_state['scores'][1]

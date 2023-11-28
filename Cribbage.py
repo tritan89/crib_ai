@@ -30,7 +30,7 @@ from Deck import Rank, Deck
 from Scoring import getScore, scoreCards
 
 # Utility imports
-from Utilities import cardsString, areCardsEqual
+from Utilities import cards_string, are_cards_equal
 
 
 class Cribbage:
@@ -140,7 +140,7 @@ class Cribbage:
             if not (self.critic is None) and player.number == 1:
                 critic_throws = self.critic.throw_crib_cards(
                     2, self.game_state())
-                if not areCardsEqual(critic_throws, thrown):
+                if not are_cards_equal(critic_throws, thrown):
                     self.players[0].explain_throw()
                     self.critic.explain_throw()
             if self.verbose:
@@ -175,7 +175,7 @@ class Cribbage:
             player.pips += score
             if self.verbose:
                 print(
-                    f"Scoring {player.get_name()}'s hand: {cardsString(player.hand)} + {str(self.starter)}")
+                    f"Scoring {player.get_name()}'s hand: {cards_string(player.hand)} + {str(self.starter)}")
                 print(f"\t{player.get_name()}'s hand scored {score}")
 
         if not self.check_win():
@@ -183,7 +183,7 @@ class Cribbage:
             self.players[self.dealer].pips += crib_score
             if self.verbose:
                 print(
-                    f"In {self.players[self.dealer].get_name()}'s crib: {cardsString(self.crib)} + {str(self.starter)}")
+                    f"In {self.players[self.dealer].get_name()}'s crib: {cards_string(self.crib)} + {str(self.starter)}")
                 print(
                     f"{self.players[self.dealer].get_name()} scored {crib_score} in the crib!\n\n")
 
@@ -249,7 +249,7 @@ class Cribbage:
                     self.in_play.append(played_card)
                     self.play_order.append(played_card)
                     if self.verbose:
-                        print(f"\t{count}: {cardsString(self.in_play)}")
+                        print(f"\t{count}: {cards_string(self.in_play)}")
                     self.players[to_play].pips += scoreCards(
                         self.in_play, self.verbose)
                     go_counter = 0
@@ -297,4 +297,4 @@ class Cribbage:
             print(player)
 
         print("Cut: " + str(self.starter))
-        print("Crib: " + cardsString(self.crib))
+        print("Crib: " + cards_string(self.crib))

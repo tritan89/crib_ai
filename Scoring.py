@@ -57,7 +57,7 @@ def checkPairs(hand, verbose):
             if hand[i].rank == hand[j].rank:
                 pips += 2
                 if verbose:
-                    print("\tPair for 2! " + cardsString([hand[i], hand[j]]))
+                    print("\tPair for 2! " + cards_string([hand[i], hand[j]]))
 
     return pips
 
@@ -65,7 +65,7 @@ def checkNobs(hand, starter, verbose):
     for card in hand:
         if card.rank == Rank.Jack and card.suit == starter.suit:
             if verbose:
-                print("\t1 for Nobs! " + cardsString([card, starter]))
+                print("\t1 for Nobs! " + cards_string([card, starter]))
             return 1
     return 0
 
@@ -73,7 +73,7 @@ def checkSum(cards, goal, verbose):
     pips = 0
     if (sum([card.value() for card in cards])) == goal:
         if verbose:
-            print("\t" + str(goal) + " for 2! " + cardsString(cards))
+            print("\t" + str(goal) + " for 2! " + cards_string(cards))
         pips += 2
     return pips
 
@@ -86,7 +86,7 @@ def checkRuns(hand, verbose):
         for combination in combinations(hand, i):
             if all([x.rank.value - y.rank.value == 1 for x, y in zip(combination[1:], combination[:-1])]):
                 if verbose:
-                    print("\tRun for " + str(i) + "! " + cardsString(combination))
+                    print("\tRun for " + str(i) + "! " + cards_string(combination))
                 pips += i
                 runFound = True
 
@@ -101,10 +101,10 @@ def checkFlush(hand, starter, verbose):
     if all(suits):
         if starter.suit == hand[0].suit:
             pips = 5
-            temp = "Flush of 5! " + cardsString([starter] + hand)
+            temp = "Flush of 5! " + cards_string([starter] + hand)
         else:
             pips = 4
-            temp = "Flush of 4! " + cardsString(hand)
+            temp = "Flush of 4! " + cards_string(hand)
         if verbose:
             print("\t" + temp)
 
