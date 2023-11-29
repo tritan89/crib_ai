@@ -2,6 +2,7 @@
 from Cribbage import Cribbage
 from PlayerRandom import PlayerRandom
 from Player_AI import Player_AI
+from MachineAI import MachineAI
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
