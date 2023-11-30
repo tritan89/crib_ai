@@ -31,7 +31,7 @@ def sim_hands(numhands):
         game_sim.reset_game()
     return scores_random, scores_ai
 
-# random_scores, ai_scores = sim_hands(100)
+# random_scores, ai_scores = sim_hands(1000)
 
 
 # np.save('random_scores.npy', random_scores)
