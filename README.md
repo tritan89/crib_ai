@@ -1,7 +1,7 @@
 Crib AI Design Specification
 CSC 421
-Tristan Langer V00943992
-Kjartan R Einarsson V00885049
+Tristan Langer 
+Kjartan R Einarsson
 
 Problem Description :
 I have always loved playing crib with my family and friends growing up and still play lots nowadays. While playing crib on my phone one day I noticed the version of my app has lots of statistics about optimal discarding and possible misplays. This got me thinking about designing an AI to play crib. The goal of this project is to create multiple agents that will use different strategies to solve the problem of playing crib. The goal of the game of crib is to score 121 points before your opponent. Points can be scored via two methods, pegging and counting. This allows us to divide the problem into two separate cases, solving the problem of choosing two cards to discard and then solving the problem of choosing a card to play. 
